@@ -250,7 +250,14 @@ public abstract class TajoResultSetBase implements ResultSet {
 
   @Override
   public int findColumn(String colName) throws SQLException {
-    return schema.getColumnIdByName(colName);
+      Integer columnId = schema.getColumnIdByName(colName);
+      if (columnId == -1) {
+          columnId = schema.getColumnId(colName);
+          if (columnId == null) {
+              columnId = -1;
+          }
+      }
+      return columnId;
   }
 
   @Override

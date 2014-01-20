@@ -29,6 +29,7 @@ import org.apache.tajo.QueryId;
 import org.apache.tajo.QueryIdFactory;
 import org.apache.tajo.TajoProtos;
 import org.apache.tajo.algebra.Expr;
+import org.apache.tajo.algebra.JsonHelper;
 import org.apache.tajo.catalog.*;
 import org.apache.tajo.catalog.exception.AlreadyExistsTableException;
 import org.apache.tajo.catalog.exception.NoSuchTableException;
@@ -123,17 +124,33 @@ public class GlobalEngine extends AbstractService {
           }
       }
 
+      Expr planningContext = null;
+
       final boolean hiveQueryMode = context.getConf().getBoolVar(TajoConf.ConfVars.HIVE_QUERY_MODE);
       LOG.info("hive.query.mode:" + hiveQueryMode);
 
       if (hiveQueryMode) {
         context.getSystemMetrics().counter("Query", "numHiveMode").inc();
         queryContext.setHiveQueryMode();
+        planningContext = converter.parse(sql);
+      }
+
+      final boolean planningContextQueryMode = sql.charAt(0) == '{'; //context.getConf().getBoolVar(TajoConf.ConfVars.PLANNING_CONTEXT_QUERY_MODE);
+      LOG.info("planning.context.query.mode:" + planningContextQueryMode);
+
+      if (planningContextQueryMode) {
+        context.getSystemMetrics().counter("Query", "numPlanningContextMode").inc();
+        queryContext.setPlanningContextQueryMode();
+        planningContext = JsonHelper.fromJson(sql, Expr.class);
       }
 
       context.getSystemMetrics().counter("Query", "totalQuery").inc();
 
-      Expr planningContext = hiveQueryMode ? converter.parse(sql) : analyzer.parse(sql);
+      if (planningContext == null) {
+        planningContext = analyzer.parse(sql);
+      }
+
+      LOG.info("Planning Context: " + planningContext.toJson());
 
       LogicalPlan plan = createLogicalPlan(planningContext);
       LogicalRootNode rootNode = plan.getRootBlock().getRoot();

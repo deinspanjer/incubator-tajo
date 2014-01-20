@@ -31,6 +31,7 @@ import org.apache.hadoop.yarn.event.EventHandler;
 import org.apache.hadoop.yarn.util.Clock;
 import org.apache.tajo.*;
 import org.apache.tajo.algebra.Expr;
+import org.apache.tajo.algebra.JsonHelper;
 import org.apache.tajo.catalog.CatalogService;
 import org.apache.tajo.catalog.TableDesc;
 import org.apache.tajo.conf.TajoConf;
@@ -271,6 +272,8 @@ public class QueryMasterTask extends CompositeService {
     if (queryContext.isHiveQueryMode()) {
       HiveConverter hiveConverter = new HiveConverter();
       expr = hiveConverter.parse(sql);
+    } else if (queryContext.isPlanningContextQueryMode()) {
+        expr = JsonHelper.fromJson(sql, Expr.class);
     } else {
       SQLAnalyzer analyzer = new SQLAnalyzer();
       expr = analyzer.parse(sql);

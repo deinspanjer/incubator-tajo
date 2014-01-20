@@ -102,7 +102,7 @@ public abstract class Expr implements JsonSerializable {
                                     JsonDeserializationContext context)
         throws JsonParseException {
       JsonObject jsonObject = json.getAsJsonObject();
-      String operator = jsonObject.get("type").getAsString();
+      String operator = jsonObject.get("opType").getAsString();
       return context.deserialize(json, OpType.valueOf(operator).getBaseClass());
     }
 

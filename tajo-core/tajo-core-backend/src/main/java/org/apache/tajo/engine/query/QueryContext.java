@@ -190,4 +190,12 @@ public class QueryContext extends Options {
   public boolean isHiveQueryMode() {
     return getBool("hive.query.mode");
   }
+
+  public void setPlanningContextQueryMode() {
+    setBool("planning.context.query.mode", true);
+  }
+
+  public boolean isPlanningContextQueryMode() {
+    return getBool("planning.context.query.mode");
+  }
 }

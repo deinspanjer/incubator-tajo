@@ -44,7 +44,7 @@ import org.apache.tajo.rpc.protocolrecords.PrimitiveProtos.StringProto;
 import org.apache.tajo.util.NetUtils;
 import org.apache.tajo.rpc.ServerCallable;
 
-import java.io.IOException;
+import java.io.*;
 import java.net.InetSocketAddress;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -53,7 +53,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @ThreadSafe
-public class TajoClient {
+public class TajoClient implements AutoCloseable, Closeable{
   private final Log LOG = LogFactory.getLog(TajoClient.class);
 
   private final TajoConf conf;
