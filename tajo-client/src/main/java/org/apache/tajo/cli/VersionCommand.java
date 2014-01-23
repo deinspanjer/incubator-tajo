@@ -16,52 +16,36 @@
  * limitations under the License.
  */
 
-package org.apache.tajo.algebra;
+package org.apache.tajo.cli;
 
-import org.apache.tajo.util.TUtil;
+import org.apache.tajo.TajoConstants;
+import org.apache.tajo.client.TajoClient;
 
-public class TargetExpr extends Expr {
-  private Expr expr;
-  private String alias;
+import java.io.PrintWriter;
 
-  public TargetExpr(Expr expr) {
-    super(OpType.Target);
-    this.expr = expr;
-  }
+public class VersionCommand extends TajoShellCommand {
 
-  public TargetExpr(Expr expr, String alias) {
-    this(expr);
-    setAlias(alias);
-  }
-
-  public Expr getExpr() {
-    return expr;
-  }
-
-  public boolean hasAlias() {
-    return this.alias != null;
-  }
-
-  public String getAlias() {
-    return this.alias;
-  }
-
-  public void setAlias(String alias) {
-    this.alias = alias;
+  public VersionCommand(TajoClient client, PrintWriter sout) {
+    super(client, sout);
   }
 
   @Override
-  public boolean equalsTo(Expr obj) {
-    if (obj instanceof TargetExpr) {
-      TargetExpr another = (TargetExpr) obj;
-      return expr.equals(another.expr) && TUtil.checkEquals(alias, another.alias);
-    }
-
-    return false;
+  public String getCommand() {
+    return "\\version";
   }
 
   @Override
-  public String toJson() {
-    return JsonHelper.toJson(this);
+  public void invoke(String[] cmd) throws Exception {
+    sout.println(TajoConstants.TAJO_VERSION);
+  }
+
+  @Override
+  public String getUsage() {
+    return "";
+  }
+
+  @Override
+  public String getDescription() {
+    return "show Apache License 2.0";
   }
 }

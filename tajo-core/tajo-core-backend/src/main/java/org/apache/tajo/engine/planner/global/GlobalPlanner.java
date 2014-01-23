@@ -50,8 +50,7 @@ public class GlobalPlanner {
   private TajoConf conf;
   private CatalogProtos.StoreType storeType;
 
-  public GlobalPlanner(final TajoConf conf, final AbstractStorageManager sm)
-      throws IOException {
+  public GlobalPlanner(final TajoConf conf, final AbstractStorageManager sm) throws IOException {
     this.conf = conf;
     this.storeType = CatalogProtos.StoreType.valueOf(conf.getVar(TajoConf.ConfVars.SHUFFLE_FILE_FORMAT).toUpperCase());
     Preconditions.checkArgument(storeType != null);
@@ -249,8 +248,7 @@ public class GlobalPlanner {
   }
 
   private ExecutionBlock buildGroupBy(GlobalPlanContext context, ExecutionBlock childBlock,
-                                      GroupbyNode groupbyNode)
-      throws PlanningException {
+                                      GroupbyNode groupbyNode) throws PlanningException {
 
     MasterPlan masterPlan = context.plan;
     ExecutionBlock currentBlock;
@@ -259,7 +257,6 @@ public class GlobalPlanner {
       return buildDistinctGroupBy(context, childBlock, groupbyNode);
     } else {
       GroupbyNode firstPhaseGroupBy = PlannerUtil.transformGroupbyTo2P(groupbyNode);
-      firstPhaseGroupBy.setHavingCondition(null);
 
       if (firstPhaseGroupBy.getChild().getType() == NodeType.TABLE_SUBQUERY &&
           ((TableSubQueryNode)firstPhaseGroupBy.getChild()).getSubQuery().getType() == NodeType.UNION) {
@@ -365,10 +362,20 @@ public class GlobalPlanner {
 
     // if result table is not a partitioned table, directly store it
     if(partitionDesc == null) {
-      currentNode.setChild(childBlock.getPlan());
-      currentNode.setInSchema(childBlock.getPlan().getOutSchema());
-      childBlock.setPlan(currentNode);
-      return childBlock;
+
+      if (childBlock.getPlan() == null) { // when the below is union
+        for (ExecutionBlock grandChildBlock : context.plan.getChilds(childBlock)) {
+          StoreTableNode copy = PlannerUtil.clone(context.plan.getLogicalPlan(), currentNode);
+          copy.setChild(grandChildBlock.getPlan());
+          grandChildBlock.setPlan(copy);
+        }
+        return childBlock;
+      } else {
+        currentNode.setChild(childBlock.getPlan());
+        currentNode.setInSchema(childBlock.getPlan().getOutSchema());
+        childBlock.setPlan(currentNode);
+        return childBlock;
+      }
     }
 
     // if result table is a partitioned table
@@ -382,12 +389,27 @@ public class GlobalPlanner {
     ExecutionBlock currentBlock = masterPlan.newExecutionBlock();
     DataChannel channel;
     CatalogProtos.PartitionsType partitionsType = partitionDesc.getPartitionsType();
+
     if(partitionsType == CatalogProtos.PartitionsType.COLUMN) {
       channel = new DataChannel(childBlock, currentBlock, HASH_SHUFFLE, 32);
       Column[] columns = new Column[partitionDesc.getColumns().size()];
-      channel.setShuffleKeys(partitionDesc.getColumns().toArray(columns));
+
+      if (currentNode.getType() == NodeType.INSERT) {
+        InsertNode insertNode = (InsertNode) currentNode;
+        channel.setSchema(((InsertNode)currentNode).getProjectedSchema());
+        Column [] shuffleKeys = new Column[partitionDesc.getColumns().size()];
+        int i = 0;
+        for (Column column : partitionDesc.getColumns()) {
+          int id = insertNode.getTableSchema().getColumnId(column.getQualifiedName());
+          shuffleKeys[i++] = insertNode.getProjectedSchema().getColumn(id);
+        }
+        channel.setShuffleKeys(shuffleKeys);
+      } else {
+        channel.setShuffleKeys(partitionDesc.getColumns().toArray(columns));
+      }
       channel.setSchema(childNode.getOutSchema());
       channel.setStoreType(storeType);
+
     } else {
       throw new PlanningException(String.format("Not Supported PartitionsType :%s", partitionsType));
     }
@@ -419,9 +441,23 @@ public class GlobalPlanner {
 
       ExecutionBlock execBlock = context.execBlockMap.remove(child.getPID());
 
-      node.setChild(execBlock.getPlan());
-      node.setInSchema(execBlock.getPlan().getOutSchema());
-      execBlock.setPlan(node);
+      if (child.getType() == NodeType.TABLE_SUBQUERY &&
+          ((TableSubQueryNode)child).getSubQuery().getType() == NodeType.UNION) {
+        MasterPlan masterPlan = context.plan;
+        for (DataChannel dataChannel : masterPlan.getIncomingChannels(execBlock.getId())) {
+          ExecutionBlock subBlock = masterPlan.getExecBlock(dataChannel.getSrcId());
+
+          ProjectionNode copy = PlannerUtil.clone(plan, node);
+          copy.setChild(subBlock.getPlan());
+          subBlock.setPlan(copy);
+        }
+        execBlock.setPlan(null);
+      } else {
+        node.setChild(execBlock.getPlan());
+        node.setInSchema(execBlock.getPlan().getOutSchema());
+        execBlock.setPlan(node);
+      }
+
       context.execBlockMap.put(node.getPID(), execBlock);
       return node;
     }
@@ -476,6 +512,20 @@ public class GlobalPlanner {
       ExecutionBlock childBlock = context.execBlockMap.remove(child.getPID());
       ExecutionBlock newExecBlock = buildSortPlan(context, childBlock, node);
       context.execBlockMap.put(node.getPID(), newExecBlock);
+
+      return node;
+    }
+
+    @Override
+    public LogicalNode visitHaving(GlobalPlanContext context, LogicalPlan plan, LogicalPlan.QueryBlock block,
+                                    HavingNode node, Stack<LogicalNode> stack) throws PlanningException {
+      LogicalNode child = super.visitHaving(context, plan, block, node, stack);
+
+      // Don't separate execution block. Having is pushed to the second grouping execution block.
+      ExecutionBlock childBlock = context.execBlockMap.remove(child.getPID());
+      node.setChild(childBlock.getPlan());
+      childBlock.setPlan(node);
+      context.execBlockMap.put(node.getPID(), childBlock);
 
       return node;
     }
@@ -553,9 +603,9 @@ public class GlobalPlanner {
       }
 
       for (ExecutionBlock childBlocks : unionBlocks) {
-        UnionNode union = (UnionNode) childBlocks.getPlan();
-        queryBlockBlocks.add(context.execBlockMap.get(union.getLeftChild().getPID()));
-        queryBlockBlocks.add(context.execBlockMap.get(union.getRightChild().getPID()));
+        for (ExecutionBlock grandChildBlock : context.plan.getChilds(childBlocks)) {
+          queryBlockBlocks.add(grandChildBlock);
+        }
       }
 
       for (ExecutionBlock childBlocks : queryBlockBlocks) {
@@ -596,7 +646,20 @@ public class GlobalPlanner {
                                           LogicalPlan.QueryBlock queryBlock,
                                           TableSubQueryNode node, Stack<LogicalNode> stack) throws PlanningException {
       LogicalNode child = super.visitTableSubQuery(context, plan, queryBlock, node, stack);
-      return handleUnaryNode(context, child, node);
+
+      ExecutionBlock currentBlock = context.execBlockMap.remove(child.getPID());
+
+      if (child.getType() == NodeType.UNION) {
+        for (ExecutionBlock childBlock : context.plan.getChilds(currentBlock.getId())) {
+          TableSubQueryNode copy = PlannerUtil.clone(plan, node);
+          copy.setSubQuery(childBlock.getPlan());
+          childBlock.setPlan(copy);
+        }
+      } else {
+        currentBlock.setPlan(node);
+      }
+      context.execBlockMap.put(node.getPID(), currentBlock);
+      return node;
     }
 
     @Override
@@ -631,13 +694,26 @@ public class GlobalPlanner {
     }
 
     @Override
+    public LogicalNode visitCreateTable(GlobalPlanContext context, LogicalPlan plan, LogicalPlan.QueryBlock queryBlock,
+                                       CreateTableNode node, Stack<LogicalNode> stack) throws PlanningException {
+      LogicalNode child = super.visitStoreTable(context, plan, queryBlock, node, stack);
+
+      ExecutionBlock childBlock = context.execBlockMap.remove(child.getPID());
+      ExecutionBlock newExecBlock = buildStorePlan(context, childBlock, node);
+      context.execBlockMap.put(node.getPID(), newExecBlock);
+
+      return node;
+    }
+
+    @Override
     public LogicalNode visitInsert(GlobalPlanContext context, LogicalPlan plan, LogicalPlan.QueryBlock queryBlock,
                                    InsertNode node, Stack<LogicalNode> stack)
         throws PlanningException {
       LogicalNode child = super.visitInsert(context, plan, queryBlock, node, stack);
-      ExecutionBlock execBlock = context.execBlockMap.remove(child.getPID());
-      execBlock.setPlan(node);
-      context.execBlockMap.put(node.getPID(), execBlock);
+
+      ExecutionBlock childBlock = context.execBlockMap.remove(child.getPID());
+      ExecutionBlock newExecBlock = buildStorePlan(context, childBlock, node);
+      context.execBlockMap.put(node.getPID(), newExecBlock);
 
       return node;
     }

@@ -30,6 +30,7 @@ import org.apache.tajo.catalog.CatalogUtil;
 import org.apache.tajo.catalog.Schema;
 import org.apache.tajo.catalog.TableDesc;
 import org.apache.tajo.catalog.TableMeta;
+import org.apache.tajo.catalog.proto.CatalogProtos;
 import org.apache.tajo.conf.TajoConf;
 import org.apache.tajo.conf.TajoConf.ConfVars;
 import org.apache.tajo.ipc.ClientProtos.*;
@@ -113,6 +114,19 @@ public class TajoClient implements AutoCloseable, Closeable{
         queryMasterMap.remove(queryId);
       }
     }
+  }
+
+  public ExplainQueryResponse explainQuery(final String sql) throws ServiceException {
+    return new ServerCallable<ExplainQueryResponse>(conf, tajoMasterAddr,
+        TajoMasterClientProtocol.class, false, true) {
+      public ExplainQueryResponse call(NettyClientBase client) throws ServiceException {
+        final ExplainQueryRequest.Builder builder = ExplainQueryRequest.newBuilder();
+        builder.setQuery(sql);
+
+        TajoMasterClientProtocolService.BlockingInterface tajoMasterService = client.getStub();
+        return tajoMasterService.explainQuery(null, builder.build());
+      }
+    }.withRetries();
   }
 
   /**
@@ -305,9 +319,15 @@ public class TajoClient implements AutoCloseable, Closeable{
         builder.setQuery(sql);
 
         TajoMasterClientProtocolService.BlockingInterface tajoMasterService = client.getStub();
-        ResultCode resultCode =
-            tajoMasterService.updateQuery(null, builder.build()).getResultCode();
-        return resultCode == ResultCode.OK;
+        UpdateQueryResponse response = tajoMasterService.updateQuery(null, builder.build());
+        if (response.getResultCode() == ResultCode.OK) {
+          return true;
+        } else {
+          if (response.hasErrorMessage()) {
+            LOG.error(response.getErrorMessage());
+          }
+          return false;
+        }
       }
     }.withRetries();
   }
@@ -476,13 +496,22 @@ public class TajoClient implements AutoCloseable, Closeable{
     return true;
   }
 
-  public static void main(String[] args) throws Exception {
-    TajoClient client = new TajoClient(new TajoConf());
+  public List<CatalogProtos.FunctionDescProto> getFunctions(final String functionName) throws ServiceException {
+    return new ServerCallable<List<CatalogProtos.FunctionDescProto>>(conf, tajoMasterAddr,
+        TajoMasterClientProtocol.class, false, true) {
+      public List<CatalogProtos.FunctionDescProto> call(NettyClientBase client) throws ServiceException, SQLException {
+        TajoMasterClientProtocolService.BlockingInterface tajoMasterService = client.getStub();
 
-    client.close();
+        String paramFunctionName = functionName == null ? "" : functionName;
 
-    synchronized(client) {
-      client.wait();
-    }
+        FunctionResponse res = tajoMasterService.getFunctionList(null,
+            StringProto.newBuilder().setValue(paramFunctionName).build());
+        if (res.getResultCode() == ResultCode.OK) {
+          return res.getFunctionsList();
+        } else {
+          throw new SQLException(res.getErrorMessage());
+        }
+      }
+    }.withRetries();
   }
 }

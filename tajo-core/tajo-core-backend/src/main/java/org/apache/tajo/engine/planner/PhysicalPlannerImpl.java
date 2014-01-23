@@ -26,31 +26,32 @@ import com.google.common.collect.ObjectArrays;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.Path;
-import org.apache.tajo.engine.planner.global.DataChannel;
-import org.apache.tajo.storage.fragment.FileFragment;
-import org.apache.tajo.storage.fragment.FragmentConvertor;
-import org.apache.tajo.worker.TaskAttemptContext;
 import org.apache.tajo.catalog.Column;
 import org.apache.tajo.catalog.SortSpec;
 import org.apache.tajo.catalog.proto.CatalogProtos;
 import org.apache.tajo.conf.TajoConf;
 import org.apache.tajo.engine.planner.enforce.Enforcer;
+import org.apache.tajo.engine.planner.global.DataChannel;
 import org.apache.tajo.engine.planner.logical.*;
 import org.apache.tajo.engine.planner.physical.*;
 import org.apache.tajo.exception.InternalException;
 import org.apache.tajo.storage.AbstractStorageManager;
 import org.apache.tajo.storage.TupleComparator;
+import org.apache.tajo.storage.fragment.FileFragment;
+import org.apache.tajo.storage.fragment.FragmentConvertor;
 import org.apache.tajo.util.IndexUtil;
 import org.apache.tajo.util.TUtil;
+import org.apache.tajo.worker.TaskAttemptContext;
 
 import java.io.IOException;
 import java.util.List;
 
 import static org.apache.tajo.catalog.proto.CatalogProtos.FragmentProto;
-import static org.apache.tajo.ipc.TajoWorkerProtocol.*;
+import static org.apache.tajo.ipc.TajoWorkerProtocol.EnforceProperty;
 import static org.apache.tajo.ipc.TajoWorkerProtocol.EnforceProperty.EnforceType;
 import static org.apache.tajo.ipc.TajoWorkerProtocol.GroupbyEnforce.GroupbyAlgorithm;
 import static org.apache.tajo.ipc.TajoWorkerProtocol.JoinEnforce.JoinAlgorithm;
+import static org.apache.tajo.ipc.TajoWorkerProtocol.SortEnforce;
 
 public class PhysicalPlannerImpl implements PhysicalPlanner {
   private static final Log LOG = LogFactory.getLog(PhysicalPlannerImpl.class);
@@ -89,8 +90,8 @@ public class PhysicalPlannerImpl implements PhysicalPlanner {
   private PhysicalExec buildOutputOperator(TaskAttemptContext context, LogicalNode plan,
                                            PhysicalExec execPlan) throws IOException {
     DataChannel channel = context.getDataChannel();
-    ShuffleFileWriteNode shuffleFileWriteNode =
-        new ShuffleFileWriteNode(UNGENERATED_PID, channel.getTargetId().toString());
+    ShuffleFileWriteNode shuffleFileWriteNode = new ShuffleFileWriteNode(UNGENERATED_PID);
+    shuffleFileWriteNode.setTableName(channel.getTargetId().toString());
     shuffleFileWriteNode.setStorageType(context.getDataChannel().getStoreType());
     shuffleFileWriteNode.setInSchema(plan.getOutSchema());
     shuffleFileWriteNode.setOutSchema(plan.getOutSchema());
@@ -115,6 +116,8 @@ public class PhysicalPlannerImpl implements PhysicalPlanner {
         EvalExprNode evalExpr = (EvalExprNode) logicalNode;
         return new EvalExprExec(ctx, evalExpr);
 
+      case CREATE_TABLE:
+      case INSERT:
       case STORE:
         StoreTableNode storeNode = (StoreTableNode) logicalNode;
         leftExec = createPlanRecursive(ctx, storeNode.getChild());
@@ -133,7 +136,8 @@ public class PhysicalPlannerImpl implements PhysicalPlanner {
       case TABLE_SUBQUERY: {
         TableSubQueryNode subQueryNode = (TableSubQueryNode) logicalNode;
         leftExec = createPlanRecursive(ctx, subQueryNode.getSubQuery());
-        return leftExec;
+        ProjectionExec projectionExec = new ProjectionExec(ctx, subQueryNode, leftExec);
+        return projectionExec;
 
       }
       case PARTITIONS_SCAN:
@@ -145,6 +149,11 @@ public class PhysicalPlannerImpl implements PhysicalPlanner {
         GroupbyNode grpNode = (GroupbyNode) logicalNode;
         leftExec = createPlanRecursive(ctx, grpNode.getChild());
         return createGroupByPlan(ctx, grpNode, leftExec);
+
+      case HAVING:
+        HavingNode havingNode = (HavingNode) logicalNode;
+        leftExec = createPlanRecursive(ctx, havingNode.getChild());
+        return new HavingExec(ctx, havingNode, leftExec);
 
       case SORT:
         SortNode sortNode = (SortNode) logicalNode;
@@ -327,12 +336,18 @@ public class PhysicalPlannerImpl implements PhysicalPlanner {
                                              PhysicalExec leftExec, PhysicalExec rightExec) throws IOException {
     SortSpec[][] sortSpecs = PlannerUtil.getSortKeysFromJoinQual(
         plan.getJoinQual(), leftExec.getSchema(), rightExec.getSchema());
-    ExternalSortExec outerSort = new ExternalSortExec(context, sm,
-        new SortNode(UNGENERATED_PID, sortSpecs[0], leftExec.getSchema(), leftExec.getSchema()),
-        leftExec);
-    ExternalSortExec innerSort = new ExternalSortExec(context, sm,
-        new SortNode(UNGENERATED_PID, sortSpecs[1], rightExec.getSchema(), rightExec.getSchema()),
-        rightExec);
+
+    SortNode leftSortNode = new SortNode(UNGENERATED_PID);
+    leftSortNode.setSortSpecs(sortSpecs[0]);
+    leftSortNode.setInSchema(leftExec.getSchema());
+    leftSortNode.setOutSchema(leftExec.getSchema());
+    ExternalSortExec outerSort = new ExternalSortExec(context, sm, leftSortNode, leftExec);
+
+    SortNode rightSortNode = new SortNode(UNGENERATED_PID);
+    rightSortNode.setSortSpecs(sortSpecs[1]);
+    rightSortNode.setInSchema(rightExec.getSchema());
+    rightSortNode.setOutSchema(rightExec.getSchema());
+    ExternalSortExec innerSort = new ExternalSortExec(context, sm, rightSortNode, rightExec);
 
     LOG.info("Join (" + plan.getPID() +") chooses [Merge Join]");
     return new MergeJoinExec(context, plan, outerSort, innerSort, sortSpecs[0], sortSpecs[1]);
@@ -399,10 +414,19 @@ public class PhysicalPlannerImpl implements PhysicalPlanner {
     LOG.info("Right Outer Join (" + plan.getPID() +") chooses [Merge Join].");
     SortSpec[][] sortSpecs2 = PlannerUtil.getSortKeysFromJoinQual(
         plan.getJoinQual(), leftExec.getSchema(), rightExec.getSchema());
-    ExternalSortExec outerSort2 = new ExternalSortExec(context, sm,
-        new SortNode(UNGENERATED_PID,sortSpecs2[0], leftExec.getSchema(), leftExec.getSchema()), leftExec);
-    ExternalSortExec innerSort2 = new ExternalSortExec(context, sm,
-        new SortNode(UNGENERATED_PID,sortSpecs2[1], rightExec.getSchema(), rightExec.getSchema()), rightExec);
+
+    SortNode leftSortNode2 = new SortNode(UNGENERATED_PID);
+    leftSortNode2.setSortSpecs(sortSpecs2[0]);
+    leftSortNode2.setInSchema(leftExec.getSchema());
+    leftSortNode2.setOutSchema(leftExec.getSchema());
+    ExternalSortExec outerSort2 = new ExternalSortExec(context, sm, leftSortNode2, leftExec);
+
+    SortNode rightSortNode2 = new SortNode(UNGENERATED_PID);
+    rightSortNode2.setSortSpecs(sortSpecs2[1]);
+    rightSortNode2.setInSchema(rightExec.getSchema());
+    rightSortNode2.setOutSchema(rightExec.getSchema());
+    ExternalSortExec innerSort2 = new ExternalSortExec(context, sm, rightSortNode2, rightExec);
+
     return new RightOuterMergeJoinExec(context, plan, outerSort2, innerSort2, sortSpecs2[0], sortSpecs2[1]);
   }
 
@@ -481,10 +505,18 @@ public class PhysicalPlannerImpl implements PhysicalPlanner {
     LOG.info("Full Outer Join (" + plan.getPID() +") chooses [Merge Join]");
     SortSpec[][] sortSpecs3 = PlannerUtil.getSortKeysFromJoinQual(plan.getJoinQual(),
         leftExec.getSchema(), rightExec.getSchema());
-    ExternalSortExec outerSort3 = new ExternalSortExec(context, sm,
-        new SortNode(UNGENERATED_PID,sortSpecs3[0], leftExec.getSchema(), leftExec.getSchema()), leftExec);
-    ExternalSortExec innerSort3 = new ExternalSortExec(context, sm,
-        new SortNode(UNGENERATED_PID,sortSpecs3[1], rightExec.getSchema(), rightExec.getSchema()), rightExec);
+
+    SortNode leftSortNode = new SortNode(UNGENERATED_PID);
+    leftSortNode.setSortSpecs(sortSpecs3[0]);
+    leftSortNode.setInSchema(leftExec.getSchema());
+    leftSortNode.setOutSchema(leftExec.getSchema());
+    ExternalSortExec outerSort3 = new ExternalSortExec(context, sm, leftSortNode, leftExec);
+
+    SortNode rightSortNode = new SortNode(UNGENERATED_PID);
+    rightSortNode.setSortSpecs(sortSpecs3[1]);
+    rightSortNode.setInSchema(rightExec.getSchema());
+    rightSortNode.setOutSchema(rightExec.getSchema());
+    ExternalSortExec innerSort3 = new ExternalSortExec(context, sm, rightSortNode, rightExec);
 
     return new MergeFullOuterJoinExec(context, plan, outerSort3, innerSort3, sortSpecs3[0], sortSpecs3[1]);
   }
@@ -706,7 +738,8 @@ public class PhysicalPlannerImpl implements PhysicalPlanner {
       sortSpecs = ObjectArrays.concat(sortSpecs, enforcedSortSpecs, SortSpec.class);
     }
 
-    SortNode sortNode = new SortNode(-1, sortSpecs);
+    SortNode sortNode = new SortNode(-1);
+    sortNode.setSortSpecs(sortSpecs);
     sortNode.setInSchema(subOp.getSchema());
     sortNode.setOutSchema(subOp.getSchema());
     // SortExec sortExec = new SortExec(sortNode, child);

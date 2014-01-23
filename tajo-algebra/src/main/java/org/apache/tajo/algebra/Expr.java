@@ -33,6 +33,17 @@ public abstract class Expr implements JsonSerializable {
 		return this.opType;
 	}
 
+  @Override
+  public abstract int hashCode();
+
+  /**
+   * This method only compares this Expr contents with those of another Expr. It does not compare
+   * those expressions' child nodes.
+   *
+   * @param expr The Expr instance to be compared.
+   * @return true Return TRUE if this Expr and another Expr's contents except for child node(s) are equivalent to
+   *              each other. Otherwise, it will return FALSE.
+   */
   abstract boolean equalsTo(Expr expr);
 
 	@Override
@@ -78,8 +89,6 @@ public abstract class Expr implements JsonSerializable {
 
   /**
    * This method provides a visiting way in the post order.
-   *
-   * @param visitor
    */
   public void accept(ExprVisitor visitor) {
     if (this instanceof UnaryOperator) {

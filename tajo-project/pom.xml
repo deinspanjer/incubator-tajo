@@ -38,6 +38,7 @@
     <tajo.version>0.8.0-SNAPSHOT</tajo.version>
     <hadoop.version>2.2.0</hadoop.version>
     <protobuf.version>2.5.0</protobuf.version>
+    <tajo.root>${project.parent.relativePath}/..</tajo.root>
   </properties>
 
   <licenses>
@@ -87,7 +88,6 @@
       <id>hsaputra</id>
       <name>Henry Saputra</name>
       <email>hsaputra@apache.org</email>
-      <organization>Platfora</organization>
       <roles>
         <role>PPMC</role>
       </roles>
@@ -144,6 +144,16 @@
       <timezone>+9</timezone>
     </developer>
     <developer>
+      <id>sirpkt</id>
+      <name>Keuntae Park</name>
+      <email>keuntae.park@sk.com</email>
+      <organization>SK Telecom</organization>
+      <roles>
+        <role></role>
+      </roles>
+      <timezone>+9</timezone>
+    </developer>
+    <developer>
       <id>omalley</id>
       <name>Owen O'Malley</name>
       <email>owen@hortonworks.com</email>
@@ -191,18 +201,31 @@
     </contributor>
     <contributor>
       <name>DaeMyung Kang</name>
+      <organization>Kakao</organization>
     </contributor>
     <contributor>
       <name>Dongmin Yu</name>
       <organization>InfiniLoop</organization>
     </contributor>
     <contributor>
-      <name>Keuntae Park </name>
+      <name>Hyoung Jun Kim</name>
+      <organization>Gruter</organization>
+    </contributor>
+    <contributor>
+      <name>Jae Young Lee</name>
       <organization>SK Telecom</organization>
     </contributor>
     <contributor>
-      <name>Hyoung Jun Kim</name>
-      <organization>Gruter</organization>
+      <name>KyoungBok Lee</name>
+      <organization>Line</organization>
+    </contributor>
+    <contributor>
+      <name>Min Zhou</name>
+      <organization>LinkedIn</organization>
+    </contributor>
+    <contributor>
+      <name>Seungun Choe</name>
+      <organization>SK Telecom</organization>
     </contributor>
     <contributor>
       <name>Sergio Esteves</name>
@@ -210,6 +233,10 @@
     <contributor>
       <name>SeongHwa Ahn</name>
       <organization>SK Telecom</organization>
+    </contributor>
+    <contributor>
+      <name>Wan Heo</name>
+      <organization>Korea University</organization>
     </contributor>
   </contributors>
 
@@ -367,6 +394,18 @@
           <artifactId>maven-surefire-report-plugin</artifactId>
           <version>2.15</version>
         </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>findbugs-maven-plugin</artifactId>
+          <version>2.3.2</version>
+          <configuration>
+            <findbugsXmlOutput>true</findbugsXmlOutput>
+            <xmlOutput>true</xmlOutput>
+            <effort>Max</effort>
+            <excludeFilterFile>${tajo.root}/dev-support/findbugs-exclude.xml</excludeFilterFile>
+          </configuration>
+        </plugin>
+
         <!--This plugin's configuration is used to store Eclipse m2e settings only. 
           It has no influence on the Maven build itself. -->
         <plugin>

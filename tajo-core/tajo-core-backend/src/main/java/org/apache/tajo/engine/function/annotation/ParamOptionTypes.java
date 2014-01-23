@@ -16,19 +16,14 @@
  * limitations under the License.
  */
 
-/**
- * 
- */
-package org.apache.tajo.engine.exception;
+package org.apache.tajo.engine.function.annotation;
 
+import org.apache.tajo.common.TajoDataTypes;
 
-public class UndefinedFunctionException extends InvalidQueryException {
-	private static final long serialVersionUID = 113593927391549716L;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
-	/**
-	 * @param signature
-	 */
-	public UndefinedFunctionException(String signature) {
-		super("Error: call to undefined function "+signature+"()");	
-	}
+@Retention(RetentionPolicy.RUNTIME)
+public @interface ParamOptionTypes {
+  TajoDataTypes.Type[] paramOptionTypes() default {};
 }

@@ -511,10 +511,40 @@ array
 
 numeric_primary
   : value_expression_primary (CAST_EXPRESSION cast_target)*
+  | numeric_value_function
   ;
 
 sign
   : PLUS | MINUS
+  ;
+
+/*
+===============================================================================
+  6.27 <numeric value function>
+===============================================================================
+*/
+
+numeric_value_function
+  : extract_expression
+  ;
+
+extract_expression
+  : EXTRACT LEFT_PAREN extract_field_string=extract_field FROM extract_source RIGHT_PAREN
+  ;
+
+extract_field
+  : primary_datetime_field
+  | time_zone_field
+  | extended_datetime_field
+  ;
+
+time_zone_field
+  : TIMEZONE | TIMEZONE_HOUR | TIMEZONE_MINUTE
+  ;
+
+extract_source
+  : column_reference
+  | datetime_literal
   ;
 
 /*
@@ -574,11 +604,11 @@ boolean_value_expression
   ;
 
 or_predicate
-  : and_predicate (OR boolean_value_expression)*
+  : and_predicate (OR or_predicate)*
   ;
 
 and_predicate
-  : boolean_factor (AND boolean_value_expression)*
+  : boolean_factor (AND and_predicate)*
   ;
 
 boolean_factor
@@ -789,8 +819,8 @@ grouping_element
   ;
 
 ordinary_grouping_set
-  : column_reference_list
-  | LEFT_PAREN column_reference_list RIGHT_PAREN
+  : row_value_predicand_list
+  | LEFT_PAREN row_value_predicand_list RIGHT_PAREN
   ;
 
 rollup_list
@@ -807,6 +837,10 @@ empty_grouping_set
 
 having_clause
   : HAVING boolean_value_expression
+  ;
+
+row_value_predicand_list
+  : row_value_predicand (COMMA row_value_predicand)*
   ;
 
 /*
@@ -1085,6 +1119,27 @@ unique_predicate
 
 /*
 ===============================================================================
+  10.1 <interval qualifier>
+
+  Specify the precision of an interval data type.
+===============================================================================
+*/
+
+primary_datetime_field
+	:	non_second_primary_datetime_field
+	|	SECOND
+	;
+
+non_second_primary_datetime_field
+  : YEAR | MONTH | DAY | HOUR | MINUTE
+  ;
+
+extended_datetime_field
+  : CENTURY | DECADE | DOW | DOY | EPOCH | ISODOW | ISOYEAR | MICROSECONDS | MILLENNIUM | MILLISECONDS | QUARTER | WEEK
+  ;
+
+/*
+===============================================================================
   10.4 <routine invocation>
 
   Invoke an SQL-invoked routine.
@@ -1124,7 +1179,7 @@ sort_specifier_list
   ;
 
 sort_specifier
-  : column=column_reference order=order_specification? null_order=null_ordering?
+  : key=row_value_predicand order=order_specification? null_order=null_ordering?
   ;
 
 order_specification

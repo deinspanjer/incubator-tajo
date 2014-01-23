@@ -179,6 +179,7 @@ public class TajoConf extends Configuration {
     // RPC
     //////////////////////////////////
     RPC_POOL_MAX_IDLE("tajo.rpc.pool.idle.max", 10),
+    RPC_CLIENT_SOCKET_IO_THREADS("tajo.rpc.client.socket-io-threads", 0),
 
     //////////////////////////////////
     // The Below is reserved
@@ -200,7 +201,10 @@ public class TajoConf extends Configuration {
     //////////////////////////////////
 
     // Metrics
-    METRICS_PROPERTY_FILENAME("tajo.metrics.property.file", "tajo-metrics.properties")
+    METRICS_PROPERTY_FILENAME("tajo.metrics.property.file", "tajo-metrics.properties"),
+
+    //CLI
+    CLI_MAX_COLUMN("tajo.cli.max_columns", 120)
     ;
 
     public final String varname;

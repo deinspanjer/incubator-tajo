@@ -37,6 +37,16 @@ message UpdateSessionVariableRequest {
   repeated string unsetVariables = 3;
 }
 
+message ExplainQueryRequest {
+  required string query = 1;
+}
+
+message ExplainQueryResponse {
+  required ResultCode resultCode = 1;
+  optional string explain = 2;
+  optional string errorMessage = 3;
+}
+
 message QueryRequest {
   optional SessionIdProto sessionId = 1;
   required string query = 2;
@@ -163,5 +173,11 @@ message DropTableRequest {
 message TableResponse {
   required ResultCode resultCode = 1;
   optional TableDescProto tableDesc = 2;
+  optional string errorMessage = 3;
+}
+
+message FunctionResponse {
+  required ResultCode resultCode = 1;
+  repeated FunctionDescProto functions = 2;
   optional string errorMessage = 3;
 }

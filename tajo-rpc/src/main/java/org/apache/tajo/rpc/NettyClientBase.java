@@ -20,6 +20,7 @@ package org.apache.tajo.rpc;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.tajo.conf.TajoConf;
 import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFuture;
@@ -35,11 +36,31 @@ import java.util.concurrent.Executors;
 public abstract class NettyClientBase implements Closeable {
   private static Log LOG = LogFactory.getLog(NettyClientBase.class);
 
-  private ClientSocketChannelFactory factory;
+  //netty default value
+  protected static final int DEFAULT_IO_THREADS = Runtime.getRuntime().availableProcessors() * 2;
+  protected static int nettyWorkerCount;
+
+  /**
+   * make this factory static thus all clients can share its thread pool.
+   * NioClientSocketChannelFactory has only one method newChannel() visible for user, which is thread-safe
+   */
+  private static final ClientSocketChannelFactory factory;
+
   protected ClientBootstrap bootstrap;
   private ChannelFuture channelFuture;
-  private Channel channel;
-  protected InetSocketAddress addr;
+
+  static {
+    TajoConf conf = new TajoConf();
+
+    nettyWorkerCount = conf.getIntVar(TajoConf.ConfVars.RPC_CLIENT_SOCKET_IO_THREADS);
+    if (nettyWorkerCount <= 0) {
+      nettyWorkerCount = DEFAULT_IO_THREADS;
+    }
+
+    factory = new NioClientSocketChannelFactory(Executors.newCachedThreadPool(),
+        Executors.newCachedThreadPool(),
+        nettyWorkerCount);
+  }
 
   public NettyClientBase() {
   }
@@ -48,20 +69,14 @@ public abstract class NettyClientBase implements Closeable {
   public abstract RpcConnectionPool.RpcConnectionKey getKey();
 
   public void init(InetSocketAddress addr, ChannelPipelineFactory pipeFactory) throws IOException {
-    this.addr = addr;
-
     try {
-      this.factory =
-          new NioClientSocketChannelFactory(Executors.newCachedThreadPool(),
-              Executors.newCachedThreadPool());
-
       this.bootstrap = new ClientBootstrap(factory);
       this.bootstrap.setPipelineFactory(pipeFactory);
       // TODO - should be configurable
       this.bootstrap.setOption("connectTimeoutMillis", 10000);
       this.bootstrap.setOption("connectResponseTimeoutMillis", 10000);
       this.bootstrap.setOption("receiveBufferSize", 1048576*2);
-      this.bootstrap.setOption("tcpNoDelay", false);
+      this.bootstrap.setOption("tcpNoDelay", true);
       this.bootstrap.setOption("keepAlive", true);
 
       this.channelFuture = bootstrap.connect(addr);
@@ -70,7 +85,6 @@ public abstract class NettyClientBase implements Closeable {
         channelFuture.getCause().printStackTrace();
         throw new RuntimeException(channelFuture.getCause());
       }
-      this.channel = channelFuture.getChannel();
     } catch (Throwable t) {
       close();
       throw new IOException(t.getCause());
@@ -82,24 +96,25 @@ public abstract class NettyClientBase implements Closeable {
   }
 
   public InetSocketAddress getRemoteAddress() {
-    return this.addr;
+    return (InetSocketAddress) channelFuture.getChannel().getRemoteAddress();
   }
 
   public Channel getChannel() {
-    return this.channel;
+    return channelFuture.getChannel();
   }
 
   @Override
   public void close() {
-    if(this.channel != null) {
-      this.channel.close().awaitUninterruptibly();
+    if(this.channelFuture != null) {
+      this.channelFuture.getChannel().close();
     }
 
     if(this.bootstrap != null) {
-      this.bootstrap.releaseExternalResources();
+      // This line will shutdown the factory
+      // this.bootstrap.releaseExternalResources();
       if(LOG.isDebugEnabled()) {
         LOG.debug("Proxy is disconnected from " +
-            addr.getAddress().getHostAddress() + ":" + addr.getPort());
+            getRemoteAddress().getHostName() + ":" + getRemoteAddress().getPort());
       }
     }
   }

@@ -56,8 +56,16 @@ public abstract class ServerCallable<T> {
     this.startTime = System.currentTimeMillis();
   }
 
+  public long getStartTime(){
+    return startTime;
+  }
+
   public void afterCall() {
     this.endTime = System.currentTimeMillis();
+  }
+
+  public long getEndTime(){
+    return endTime;
   }
 
   boolean abort = false;
@@ -70,8 +78,7 @@ public abstract class ServerCallable<T> {
    *
    * @param <T> the type of the return value
    * @return an object of type T
-   * @throws java.io.IOException if a remote or network exception occurs
-   * @throws RuntimeException other unspecified error
+   * @throws com.google.protobuf.ServiceException if a remote or network exception occurs
    */
   public T withRetries() throws ServiceException {
     //TODO configurable
@@ -97,7 +104,7 @@ public abstract class ServerCallable<T> {
           throw new ServiceException(t.getMessage(), t);
         }
         if (tries == numRetries - 1) {
-          throw new RetriesExhaustedException(tries, exceptions);
+          throw new ServiceException("Giving up after tries=" + tries, t);
         }
       } finally {
         afterCall();

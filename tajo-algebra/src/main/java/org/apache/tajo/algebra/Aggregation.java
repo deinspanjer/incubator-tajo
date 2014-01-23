@@ -18,35 +18,23 @@
 
 package org.apache.tajo.algebra;
 
+import com.google.common.base.Objects;
 import org.apache.tajo.util.TUtil;
 
 public class Aggregation extends UnaryOperator {
-  private TargetExpr[] targets;
+  private NamedExpr[] namedExprs;
   private GroupElement [] groups;
-  private Expr havingCondition;
 
   public Aggregation() {
     super(OpType.Aggregation);
   }
 
-  public TargetExpr[] getTargets() {
-    return this.targets;
+  public NamedExpr[] getTargets() {
+    return this.namedExprs;
   }
 
-  public void setTargets(TargetExpr[] targets) {
-    this.targets = targets;
-  }
-
-  public boolean hasHavingCondition() {
-    return havingCondition != null;
-  }
-
-  public Expr getHavingCondition() {
-    return havingCondition;
-  }
-
-  public void setHavingCondition(Expr expr) {
-    this.havingCondition = expr;
+  public void setTargets(NamedExpr[] namedExprs) {
+    this.namedExprs = namedExprs;
   }
 
   public void setGroups(GroupElement [] groups) {
@@ -62,30 +50,34 @@ public class Aggregation extends UnaryOperator {
   }
 
   @Override
+  public int hashCode() {
+    return Objects.hashCode(namedExprs, groups, getChild());
+  }
+
+  @Override
   public boolean equalsTo(Expr expr) {
     Aggregation another = (Aggregation) expr;
     boolean a = TUtil.checkEquals(groups, another.groups);
-    boolean b = TUtil.checkEquals(targets, another.targets);
-    boolean c = TUtil.checkEquals(havingCondition, another.havingCondition);
+    boolean b = TUtil.checkEquals(namedExprs, another.namedExprs);
 
-    return a && b && c;
+    return a && b;
   }
 
   public static class GroupElement implements JsonSerializable {
     private GroupType group_type;
-    private ColumnReferenceExpr[] columns;
+    private Expr [] grouping_sets;
 
-    public GroupElement(GroupType groupType, ColumnReferenceExpr[] columns) {
+    public GroupElement(GroupType groupType, Expr[] grouping_sets) {
       this.group_type = groupType;
-      this.columns = columns;
+      this.grouping_sets = grouping_sets;
     }
 
     public GroupType getType() {
       return this.group_type;
     }
 
-    public ColumnReferenceExpr[] getColumns() {
-      return this.columns;
+    public Expr[] getGroupingSets() {
+      return this.grouping_sets;
     }
 
     public String toString() {
@@ -97,11 +89,17 @@ public class Aggregation extends UnaryOperator {
       return JsonHelper.toJson(this);
     }
 
+    @Override
+    public int hashCode() {
+      return Objects.hashCode(group_type, grouping_sets);
+    }
+
+    @Override
     public boolean equals(Object obj) {
       if (obj instanceof GroupElement) {
         GroupElement other = (GroupElement) obj;
         return group_type.equals(other) &&
-            TUtil.checkEquals(columns, other.columns);
+            TUtil.checkEquals(grouping_sets, other.grouping_sets);
       }
 
       return false;
