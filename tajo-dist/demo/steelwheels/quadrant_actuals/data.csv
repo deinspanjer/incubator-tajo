@@ -1,0 +1,148 @@
+Central|Sales|District Manager|682625.0000|617250.0000|-65375.0000
+Central|Sales|Senior Sales Rep|497223.0000|484820.0000|-12403.0000
+Central|Sales|Sales Rep|675975.0000|612500.0000|-63475.0000
+Central|Sales|Account Executive|409975.0000|422500.0000|12525.0000
+Central|Sales|Pre-Sales|649375.0000|593500.0000|-55875.0000
+Central|Executive Management|CEO|549625.0000|522250.0000|-27375.0000
+Central|Executive Management|SVP WW Operations|476000.0000|725887.0000|249887.0000
+Central|Executive Management|SVP Strategic Development|383242.0000|403405.0000|20163.0000
+Central|Executive Management|SVP Partnerships|367415.0000|392100.0000|24685.0000
+Central|Finance|CFO|770272.0000|719855.0000|-50417.0000
+Central|Finance|Administrative Assisitant|827861.0000|760990.0000|-66871.0000
+Central|Finance|IS|570759.0000|577346.0000|6587.0000
+Central|Finance|Controller|570373.0000|577070.0000|6697.0000
+Central|Finance|Payroll|367415.0000|432100.0000|64685.0000
+Central|Human Resource|Administration|549625.0000|552250.0000|2625.0000
+Central|Human Resource|SVP HR|574895.0000|570300.0000|-4595.0000
+Central|Human Resource|HR Generalists|856190.0000|771225.0000|-84965.0000
+Central|Human Resource|HR Training|397473.0000|443570.0000|46097.0000
+Central|Human Resource|Sexual Harassment|530473.0000|538570.0000|8097.0000
+Central|Human Resource|EOE|530207.0000|538380.0000|8173.0000
+Central|Marketing & Communication|CMO|827861.0000|760990.0000|-66871.0000
+Central|Marketing & Communication|Product Marketing Mgr|693531.0000|665040.0000|-28491.0000
+Central|Marketing & Communication|Analyst Relations|383375.0000|443500.0000|60125.0000
+Central|Marketing & Communication|Press Relations|497296.0000|524872.0000|27576.0000
+Central|Marketing & Communication|Graphics|782375.0000|728500.0000|-53875.0000
+Central|Marketing & Communication|Writer|405985.0000|459650.0000|53665.0000
+Central|Product Development|CTO|405985.0000|459650.0000|53665.0000
+Central|Product Development|VP Engineering|383242.0000|443405.0000|60163.0000
+Central|Product Development|Senior Engineer|770272.0000|719855.0000|-50417.0000
+Central|Product Development|Engineer|695925.0000|666750.0000|-29175.0000
+Central|Product Development|QA Manager|374863.0000|437420.0000|62557.0000
+Central|Product Development|QA Engineer|367415.0000|432100.0000|64685.0000
+Central|Professional Services|SVP Services|4042220.0000|4180000.0000|137780.0000
+Central|Professional Services|Services Mgr|4401586.0000|4680000.0000|278414.0000
+Central|Professional Services|Senior Consultant|3994859.0000|3980000.0000|-14859.0000
+Central|Professional Services|Staff Consultant|3824426.0000|4180000.0000|355574.0000
+Central|Professional Services|Trainer|3804948.0000|3380000.0000|-424948.0000
+Eastern|Sales|District Manager|700000.0000|700250.0000|250.0000
+Eastern|Sales|Senior Sales Rep|421200.0000|433299.0000|12099.0000
+Eastern|Sales|Sales Rep|690000.0000|690675.0000|675.0000
+Eastern|Sales|Account Executive|290000.0000|307675.0000|17675.0000
+Eastern|Sales|Pre-Sales|650000.0000|652375.0000|2375.0000
+Eastern|Executive Management|CEO|500000.0000|488750.0000|-11250.0000
+Eastern|Executive Management|SVP WW Operations|249800.0000|249184.0000|-616.0000
+Eastern|Executive Management|SVP Strategic Development|226000.0000|226395.0000|395.0000
+Eastern|Executive Management|SVP Partnerships|531780.0000|519179.0000|-12601.0000
+Eastern|Finance|CFO|831800.0000|816449.0000|-15351.0000
+Eastern|Finance|Administrative Assisitant|918400.0000|899368.0000|-19032.0000
+Eastern|Finance|IS|531780.0000|529179.0000|-2601.0000
+Eastern|Finance|Controller|531200.0000|528624.0000|-2576.0000
+Eastern|Finance|Payroll|226000.0000|236395.0000|10395.0000
+Eastern|Human Resource|Administration|500000.0000|498750.0000|-1250.0000
+Eastern|Human Resource|SVP HR|538000.0000|535135.0000|-2865.0000
+Eastern|Human Resource|HR Generalists|961000.0000|940158.0000|-20842.0000
+Eastern|Human Resource|HR Training|271200.0000|279674.0000|8474.0000
+Eastern|Human Resource|Sexual Harassment|471200.0000|471174.0000|-26.0000
+Eastern|Human Resource|EOE|470800.0000|470791.0000|-9.0000
+Eastern|Marketing & Communication|CMO|918400.0000|894368.0000|-24032.0000
+Eastern|Marketing & Communication|Product Marketing Mgr|716400.0000|700953.0000|-15447.0000
+Eastern|Marketing & Communication|Analyst Relations|250000.0000|254375.0000|4375.0000
+Eastern|Marketing & Communication|Press Relations|421310.0000|418404.0000|-2906.0000
+Eastern|Marketing & Communication|Graphics|850000.0000|828875.0000|-21125.0000
+Eastern|Marketing & Communication|Writer|284000.0000|286930.0000|2930.0000
+Eastern|Product Development|CTO|284000.0000|286930.0000|2930.0000
+Eastern|Product Development|VP Engineering|249800.0000|254184.0000|4384.0000
+Eastern|Product Development|Senior Engineer|831800.0000|811449.0000|-20351.0000
+Eastern|Product Development|Engineer|720000.0000|704400.0000|-15600.0000
+Eastern|Product Development|QA Manager|237200.0000|242119.0000|4919.0000
+Eastern|Product Development|QA Engineer|226000.0000|231395.0000|5395.0000
+Eastern|Professional Services|SVP Services|3793000.0000|3900000.0000|107000.0000
+Eastern|Professional Services|Services Mgr|4333400.0000|4500000.0000|166600.0000
+Eastern|Professional Services|Senior Consultant|3721780.0000|3900000.0000|178220.0000
+Eastern|Professional Services|Staff Consultant|3465490.0000|3500000.0000|34510.0000
+Eastern|Professional Services|Trainer|3436200.0000|3300000.0000|-136200.0000
+Southern|Sales|District Manager|700000.0000|690250.0000|-9750.0000
+Southern|Sales|Senior Sales Rep|421200.0000|423299.0000|2099.0000
+Southern|Sales|Sales Rep|690000.0000|680675.0000|-9325.0000
+Southern|Sales|Account Executive|290000.0000|297675.0000|7675.0000
+Southern|Sales|Pre-Sales|650000.0000|642375.0000|-7625.0000
+Southern|Executive Management|CEO|500000.0000|498750.0000|-1250.0000
+Southern|Executive Management|SVP WW Operations|249800.0000|259184.0000|9384.0000
+Southern|Executive Management|SVP Strategic Development|226000.0000|236395.0000|10395.0000
+Southern|Executive Management|SVP Partnerships|531780.0000|529179.0000|-2601.0000
+Southern|Finance|CFO|831800.0000|816449.0000|-15351.0000
+Southern|Finance|Administrative Assisitant|918400.0000|899368.0000|-19032.0000
+Southern|Finance|IS|531780.0000|529179.0000|-2601.0000
+Southern|Finance|Controller|531200.0000|528624.0000|-2576.0000
+Southern|Finance|Payroll|226000.0000|236395.0000|10395.0000
+Southern|Human Resource|Administration|500000.0000|498750.0000|-1250.0000
+Southern|Human Resource|SVP HR|538000.0000|535135.0000|-2865.0000
+Southern|Human Resource|HR Generalists|961000.0000|940158.0000|-20842.0000
+Southern|Human Resource|HR Training|271200.0000|279674.0000|8474.0000
+Southern|Human Resource|Sexual Harassment|471200.0000|471174.0000|-26.0000
+Southern|Human Resource|EOE|470800.0000|470791.0000|-9.0000
+Southern|Marketing & Communication|CMO|918400.0000|897368.0000|-21032.0000
+Southern|Marketing & Communication|Product Marketing Mgr|716400.0000|703953.0000|-12447.0000
+Southern|Marketing & Communication|Analyst Relations|250000.0000|257375.0000|7375.0000
+Southern|Marketing & Communication|Press Relations|421310.0000|421404.0000|94.0000
+Southern|Marketing & Communication|Graphics|850000.0000|831875.0000|-18125.0000
+Southern|Marketing & Communication|Writer|284000.0000|289930.0000|5930.0000
+Southern|Product Development|CTO|284000.0000|289930.0000|5930.0000
+Southern|Product Development|VP Engineering|249800.0000|257184.0000|7384.0000
+Southern|Product Development|Senior Engineer|831800.0000|814449.0000|-17351.0000
+Southern|Product Development|Engineer|720000.0000|707400.0000|-12600.0000
+Southern|Product Development|QA Manager|237200.0000|245119.0000|7919.0000
+Southern|Product Development|QA Engineer|226000.0000|234395.0000|8395.0000
+Southern|Professional Services|SVP Services|3793000.0000|3818000.0000|25000.0000
+Southern|Professional Services|Services Mgr|4333400.0000|4318000.0000|-15400.0000
+Southern|Professional Services|Senior Consultant|3721780.0000|3718000.0000|-3780.0000
+Southern|Professional Services|Staff Consultant|3465490.0000|3618000.0000|152510.0000
+Southern|Professional Services|Trainer|3436200.0000|2918000.0000|-518200.0000
+Western|Sales|District Manager|700000.0000|688250.0000|-11750.0000
+Western|Sales|Senior Sales Rep|421200.0000|421299.0000|99.0000
+Western|Sales|Sales Rep|690000.0000|678675.0000|-11325.0000
+Western|Sales|Account Executive|290000.0000|295675.0000|5675.0000
+Western|Sales|Pre-Sales|650000.0000|640375.0000|-9625.0000
+Western|Executive Management|CEO|500000.0000|478750.0000|-21250.0000
+Western|Executive Management|SVP WW Operations|249800.0000|239184.0000|-10616.0000
+Western|Executive Management|SVP Strategic Development|226000.0000|216395.0000|-9605.0000
+Western|Executive Management|SVP Partnerships|531780.0000|509179.0000|-22601.0000
+Western|Finance|CFO|831800.0000|814449.0000|-17351.0000
+Western|Finance|Administrative Assisitant|918400.0000|897368.0000|-21032.0000
+Western|Finance|IS|531780.0000|527179.0000|-4601.0000
+Western|Finance|Controller|531200.0000|526624.0000|-4576.0000
+Western|Finance|Payroll|226000.0000|234395.0000|8395.0000
+Western|Human Resource|Administration|500000.0000|496750.0000|-3250.0000
+Western|Human Resource|SVP HR|538000.0000|533135.0000|-4865.0000
+Western|Human Resource|HR Generalists|961000.0000|938158.0000|-22842.0000
+Western|Human Resource|HR Training|271200.0000|277674.0000|6474.0000
+Western|Human Resource|Sexual Harassment|471200.0000|469174.0000|-2026.0000
+Western|Human Resource|EOE|470800.0000|468791.0000|-2009.0000
+Western|Marketing & Communication|CMO|918400.0000|897368.0000|-21032.0000
+Western|Marketing & Communication|Product Marketing Mgr|716400.0000|703953.0000|-12447.0000
+Western|Marketing & Communication|Analyst Relations|250000.0000|257375.0000|7375.0000
+Western|Marketing & Communication|Press Relations|421310.0000|421404.0000|94.0000
+Western|Marketing & Communication|Graphics|850000.0000|831875.0000|-18125.0000
+Western|Marketing & Communication|Writer|284000.0000|289930.0000|5930.0000
+Western|Product Development|CTO|284000.0000|289930.0000|5930.0000
+Western|Product Development|VP Engineering|249800.0000|257184.0000|7384.0000
+Western|Product Development|Senior Engineer|831800.0000|814449.0000|-17351.0000
+Western|Product Development|Engineer|720000.0000|707400.0000|-12600.0000
+Western|Product Development|QA Manager|237200.0000|245119.0000|7919.0000
+Western|Product Development|QA Engineer|226000.0000|234395.0000|8395.0000
+Western|Professional Services|SVP Services|3793000.0000|3818000.0000|25000.0000
+Western|Professional Services|Services Mgr|4333400.0000|4418000.0000|84600.0000
+Western|Professional Services|Senior Consultant|3721780.0000|3718000.0000|-3780.0000
+Western|Professional Services|Staff Consultant|3465490.0000|3336206.0000|-129284.0000
+Western|Professional Services|Trainer|3436200.0000|2918000.0000|-518200.0000
