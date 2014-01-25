@@ -1,0 +1,13 @@
+DROP TABLE `customer_w_ter`;
+DROP TABLE `customers`;
+DROP TABLE `department_managers`;
+DROP TABLE `employees`;
+DROP TABLE `offices`;
+DROP TABLE `orderdetails`;
+DROP TABLE `orderfact`;
+DROP TABLE `orders`;
+DROP TABLE `payments`;
+DROP TABLE `products`;
+DROP TABLE `quadrant_actuals`;
+DROP TABLE `dim_time`;
+DROP TABLE `trial_balance`;
