@@ -13,7 +13,7 @@ CREATE EXTERNAL TABLE `customer_w_ter` (
   `EMPLOYEENUMBER` int8,
   `CREDITLIMIT` float8,
   `TERRITORY` text
-) USING CSV WITH ('csvfile.delimiter'='|') LOCATION 'file:TAJO_HOME/steelwheels/customer_w_ter';
+) USING CSV WITH ('csvfile.delimiter'='|') LOCATION 'file:TAJO_HOME/demo/steelwheels/customer_w_ter';
 CREATE EXTERNAL TABLE `customers` (
   `CUSTOMERNUMBER` int8,
   `CUSTOMERNAME` text ,
@@ -28,12 +28,12 @@ CREATE EXTERNAL TABLE `customers` (
   `COUNTRY` text ,
   `SALESREPEMPLOYEENUMBER` int8,
   `CREDITLIMIT` float8
-) USING CSV WITH ('csvfile.delimiter'='|') LOCATION 'file:TAJO_HOME/steelwheels/customers';
+) USING CSV WITH ('csvfile.delimiter'='|') LOCATION 'file:TAJO_HOME/demo/steelwheels/customers';
 CREATE EXTERNAL TABLE `department_managers` (
   `REGION` text ,
   `MANAGER_NAME` text ,
   `EMAIL` text 
-) USING CSV WITH ('csvfile.delimiter'='|') LOCATION 'file:TAJO_HOME/steelwheels/department_managers';
+) USING CSV WITH ('csvfile.delimiter'='|') LOCATION 'file:TAJO_HOME/demo/steelwheels/department_managers';
 CREATE EXTERNAL TABLE `employees` (
   `EMPLOYEENUMBER` int8,
   `LASTNAME` text ,
@@ -43,7 +43,7 @@ CREATE EXTERNAL TABLE `employees` (
   `OFFICECODE` text ,
   `REPORTSTO` int8,
   `JOBTITLE` text
-) USING CSV WITH ('csvfile.delimiter'='|') LOCATION 'file:TAJO_HOME/steelwheels/employees';
+) USING CSV WITH ('csvfile.delimiter'='|') LOCATION 'file:TAJO_HOME/demo/steelwheels/employees';
 CREATE EXTERNAL TABLE `offices` (
   `OFFICECODE` text ,
   `CITY` text ,
@@ -54,14 +54,14 @@ CREATE EXTERNAL TABLE `offices` (
   `COUNTRY` text ,
   `POSTALCODE` text ,
   `TERRITORY` text 
-) USING CSV WITH ('csvfile.delimiter'='|') LOCATION 'file:TAJO_HOME/steelwheels/offices';
+) USING CSV WITH ('csvfile.delimiter'='|') LOCATION 'file:TAJO_HOME/demo/steelwheels/offices';
 CREATE EXTERNAL TABLE `orderdetails` (
   `ORDERNUMBER` int8,
   `PRODUCTCODE` text ,
   `QUANTITYORDERED` int8,
   `PRICEEACH` float8,
   `ORDERLINENUMBER` int2
-) USING CSV WITH ('csvfile.delimiter'='|') LOCATION 'file:TAJO_HOME/steelwheels/orderdetails';
+) USING CSV WITH ('csvfile.delimiter'='|') LOCATION 'file:TAJO_HOME/demo/steelwheels/orderdetails';
 CREATE EXTERNAL TABLE `orderfact` (
   `ORDERNUMBER` int8,
   `PRODUCTCODE` text ,
@@ -79,7 +79,7 @@ CREATE EXTERNAL TABLE `orderfact` (
   `QTR_ID` bigint,
   `MONTH_ID` bigint,
   `YEAR_ID` bigint
-) USING CSV WITH ('csvfile.delimiter'='|') LOCATION 'file:TAJO_HOME/steelwheels/orderfact';
+) USING CSV WITH ('csvfile.delimiter'='|') LOCATION 'file:TAJO_HOME/demo/steelwheels/orderfact';
 CREATE EXTERNAL TABLE `orders` (
   `ORDERNUMBER` int8,
   `ORDERDATE` timestamp,
@@ -88,13 +88,13 @@ CREATE EXTERNAL TABLE `orders` (
   `STATUS` text ,
   `COMMENTS` text ,
   `CUSTOMERNUMBER` int8
-) USING CSV WITH ('csvfile.delimiter'='|') LOCATION 'file:TAJO_HOME/steelwheels/orders';
+) USING CSV WITH ('csvfile.delimiter'='|') LOCATION 'file:TAJO_HOME/demo/steelwheels/orders';
 CREATE EXTERNAL TABLE `payments` (
   `CUSTOMERNUMBER` int8,
   `CHECKNUMBER` text ,
   `PAYMENTDATE` timestamp,
   `AMOUNT` float8
-) USING CSV WITH ('csvfile.delimiter'='|') LOCATION 'file:TAJO_HOME/steelwheels/payments';
+) USING CSV WITH ('csvfile.delimiter'='|') LOCATION 'file:TAJO_HOME/demo/steelwheels/payments';
 CREATE EXTERNAL TABLE `products` (
   `PRODUCTCODE` text ,
   `PRODUCTNAME` text ,
@@ -105,7 +105,7 @@ CREATE EXTERNAL TABLE `products` (
   `QUANTITYINSTOCK` int2,
   `BUYPRICE` float8,
   `MSRP` float8
-) USING CSV WITH ('csvfile.delimiter'='|') LOCATION 'file:TAJO_HOME/steelwheels/products';
+) USING CSV WITH ('csvfile.delimiter'='|') LOCATION 'file:TAJO_HOME/demo/steelwheels/products';
 CREATE EXTERNAL TABLE `quadrant_actuals` (
   `REGION` text ,
   `DEPARTMENT` text ,
@@ -113,7 +113,7 @@ CREATE EXTERNAL TABLE `quadrant_actuals` (
   `ACTUAL` float8,
   `BUDGET` float8,
   `VARIANCE` float8
-) USING CSV WITH ('csvfile.delimiter'='|') LOCATION 'file:TAJO_HOME/steelwheels/quadrant_actuals';
+) USING CSV WITH ('csvfile.delimiter'='|') LOCATION 'file:TAJO_HOME/demo/steelwheels/quadrant_actuals';
 CREATE EXTERNAL TABLE `dim_time` (
   `TIME_ID` text ,
   `MONTH_ID` int8,
@@ -123,7 +123,7 @@ CREATE EXTERNAL TABLE `dim_time` (
   `MONTH_DESC` text ,
   `QTR_NAME` text ,
   `QTR_DESC` text 
-) USING CSV WITH ('csvfile.delimiter'='|') LOCATION 'file:TAJO_HOME/steelwheels/dim_time';
+) USING CSV WITH ('csvfile.delimiter'='|') LOCATION 'file:TAJO_HOME/demo/steelwheels/dim_time';
 CREATE EXTERNAL TABLE `trial_balance` (
   `Type` text,
   `Account_Num` int8,
@@ -131,4 +131,4 @@ CREATE EXTERNAL TABLE `trial_balance` (
   `Category2` text ,
   `Detail` text ,
   `Amount` int8
-) USING CSV WITH ('csvfile.delimiter'='|') LOCATION 'file:TAJO_HOME/steelwheels/trial_balance';
+) USING CSV WITH ('csvfile.delimiter'='|') LOCATION 'file:TAJO_HOME/demo/steelwheels/trial_balance';
